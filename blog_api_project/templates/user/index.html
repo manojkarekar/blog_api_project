@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>Welcome</h1>
+
+    {% if user.is_authenticated %}
+      <p>
+        Logged in as: <strong>{{ user.username }}</strong>
+      </p>
+      <a href="{% url 'user-logout' %}" id="logout">Logout</a>
+    {% else %}
+      <a href="{% url 'user-login' %}">Login</a>
+    {% endif %}
+  </body>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Fetch user data when page loads
+      fetchUserData()
+    
+      // Logout functionality
+      const logoutButton = document.getElementById('logout')
+    
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function (event) {
+          event.preventDefault() // Prevent default link behavior
+    
+          // Clear token from localStorage
+          localStorage.removeItem('access_token')
+    
+          // Redirect to Django logout URL
+          window.location.href = "{% url 'user-logout' %}"
+        })
+      }
+    })
+    
+    async function fetchUserData() {
+      const token = localStorage.getItem('access_token')
+    
+      if (!token) {
+        console.log('No access token found')
+        return
+      }
+    
+      try {
+        const response = await fetch('http://127.0.0.1:8000/', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+    
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data')
+        }
+    
+        const data = await response.text()
+        document.body.innerHTML = data // Update page with user info
+      } catch (error) {
+        console.error('Error:', error)
+      }
+    }
+  </script>
+</html>
