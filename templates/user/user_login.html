@@ -9,51 +9,68 @@
     <h2>Login</h2>
     {% if messages %}
     <div class="alert alert-primary" role="alert">
-        {% for message in messages %}
-        {{ message }}
-        {% endfor %}
+      {% for message in messages %} {{ message }} {% endfor %}
     </div>
     {% endif %}
 
-    <form id="loginForm" method="POST">
+    <form id="loginForm">
       {% csrf_token %}
-      <input type="text" id="username" name="username" placeholder="Username" required /><br /><br />
-      <input type="password" id="password" name="password" placeholder="Password" required /><br /><br />
+      <input
+        type="text"
+        id="username"
+        name="username"
+        placeholder="Username"
+        required
+      /><br /><br />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder="Password"
+        required
+      /><br /><br />
       <button type="submit">Login</button>
     </form>
 
     <p>
-      Don't have an account? <a href="{% url 'user-register' %}">Register here</a>
+      Don't have an account?
+      <a href="{% url 'user-register' %}">Register here</a>
     </p>
 
     <script>
-      document.getElementById('loginForm').addEventListener('submit', function (event) {
-        event.preventDefault()
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
 
-        let username = document.getElementById('username').value
-        let password = document.getElementById('password').value
+          let username = document.getElementById("username").value;
+          let password = document.getElementById("password").value;
 
-        // Send login request to backend
-        fetch('http://127.0.0.1:8000/api/login/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username, password })
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.message === 'Login successful!') {
-              alert('Login successful!');
-              window.location.href = '/'; // Redirect to home page after successful login
-            } else {
-              alert('Login failed: ' + data.message);
-            }
+          // Send login request to backend
+          fetch("http://127.0.0.1:8000/api/login/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+              ).value,
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: "include", // ✅ Important: Ensures session cookie is sent
           })
-          .catch((error) => {
-            alert('Error: ' + error);
-          })
-      })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message === "Login successful!") {
+                alert("Login successful!");
+                window.location.href = "/"; // ✅ Redirect to home page
+              } else {
+                alert("Login failed: " + data.message);
+              }
+            })
+            .catch((error) => {
+              alert("Error: " + error);
+            });
+        });
     </script>
   </body>
 </html>

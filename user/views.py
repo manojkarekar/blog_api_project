@@ -7,4 +7,5 @@ from django.contrib.auth.models import AnonymousUser
 
 
 def index(request):
+    
     return render(request, "user/index.html")

@@ -10,42 +10,57 @@
 
     {% if user.is_authenticated %}
     <p>Logged in as: {{ user.username }}</p>
+    <button id="logout">Logout</button>
     {% else %}
     <p>User is not logged in</p>
-    {% endif %}
-
-    <button id="logout" {% if not user.is_authenticated %} style="display:none" {% endif %}>Logout</button>
-
     <a href="{% url 'user-login' %}">Login</a>
-
+    {% endif %}
   </body>
 
   <script>
     let logoutButton = document.getElementById("logout");
 
-    logoutButton.addEventListener("click", async function (event) {
-      event.preventDefault(); // Prevent default behavior
-    
-      try {
-        // Send POST request to logout the user
-        const response = await fetch("/api/logout/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+    if (logoutButton) {
+      logoutButton.addEventListener("click", async function (event) {
+        event.preventDefault(); // Prevent default behavior
 
-        if (response.ok) {
-          console.log("Logout successful!");
+        try {
+          // Send POST request to logout the user
+          const response = await fetch("/api/logout/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"), // ✅ Include CSRF token
+            },
+            credentials: "include", // ✅ Include cookies for session logout
+          });
 
-          alert("Logout successful!");
-          window.location.href = "{% url 'user-login' %}"; // Redirect to login page
-        } else {
-          alert("Logout failed. Please try again.");
+          if (response.ok) {
+            alert("Logout successful!");
+            window.location.href = "{% url 'user-login' %}"; // Redirect to login page
+          } else {
+            alert("Logout failed. Please try again.");
+          }
+        } catch (error) {
+          console.error("Logout error:", error);
         }
-      } catch (error) {
-        console.error("Logout error:", error);
+      });
+    }
+
+    // ✅ Function to get CSRF token from cookies
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        let cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          let cookie = cookies[i].trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
       }
-    });
+      return cookieValue;
+    }
   </script>
 </html>

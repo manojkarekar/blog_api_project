@@ -6,15 +6,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .auth_serializers import *
 from django.contrib.auth import login , logout
 from django.contrib.auth import authenticate
-from rest_framework.decorators import api_view
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAuthenticated
 
-
-# from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
-
-
+#user register api views
 class RegisterAPIView(APIView):
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
@@ -28,54 +23,35 @@ class RegisterAPIView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# api_views.py (Django API views for login)
-
+# user login api views
 class LoginAPIView(APIView):
     def post(self, request):
+        
         if request.user.is_authenticated:
-            return Response(
-                {'message': 'You are already logged in.'},
-                status=status.HTTP_200_OK
-            )
+            return Response({'message': 'You are already logged in.'}, status=status.HTTP_200_OK)
 
         username = request.data.get('username')
         password = request.data.get('password')
 
-        # Authenticate the user
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)  # Log the user in via Django session
-
-            # Generate JWT token
-            refresh = RefreshToken.for_user(user)
-            access_token = str(refresh.access_token)
-
-            return Response(
-                {'message': 'Login successful!', 'access_token': access_token},
-                status=status.HTTP_200_OK
-            )
-        return Response(
-            {'message': 'Invalid credentials'},
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+            login(request, user) 
+            response = Response({'message': 'Login successful!'}, status=status.HTTP_200_OK)
+            return response
+        
+        return Response({'message': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+# test api views after user is login
 class IndexView(APIView):
     permission_classes = [IsAuthenticated] 
 
     def get(self, request):
         # You can access the user info via request.user
         return Response({'message': "User home page"}, status=status.HTTP_200_OK)
-
-# @api_view(["GET"])
-# def all_users(request):
-#     user_data = User.objects.all()
-#     users  = UserSerializer(user_data,many=True)
-#     return Response(users,status=status.HTTP_204_NO_CONTENT)    
-
-
-class ListUsers(APIView):
    
+# show all user accounts details api views 
+class ListUsers(APIView): 
     permission_classes = [IsAuthenticated] 
     def get(self,request):
         users  = User.objects.all()
@@ -83,13 +59,11 @@ class ListUsers(APIView):
         return Response(data)
 
 
-
+# user logout api views
 class LogoutAPIView(APIView):
     def post(self, request):
-        # Log the user out (removes session)
-        logout(request)
+        logout(request)  # End session
 
-        return Response(
-            {'message': 'Logout successful'},
-            status=status.HTTP_200_OK
-        )
+        response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+        response.delete_cookie("access_token")  # Remove token
+        return response

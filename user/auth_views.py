@@ -101,7 +101,8 @@ def login_view(request):
 @csrf_exempt
 def logout_view(request):
     if request.method == 'POST':
-        logout(request)  # End the Django session
-
+        logout(request) 
         response = JsonResponse({"message": "Logout successful"})
+        response.delete_cookie("sessionid")
         return response
+
