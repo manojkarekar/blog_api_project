@@ -7,34 +7,15 @@
   </head>
   <body>
     <h2>Login</h2>
-
-    <!-- Display messages if any -->
     {% if messages %}
-      <ul>
+    <div class="alert alert-primary" role="alert">
         {% for message in messages %}
-          <li style="color: {% if message.tags == 'error' %}
-              
-              
-              
-              red
-
-
-
-            {% else %}
-              
-              
-              
-              green
-
-
-
-            {% endif %};">{{ message }}</li>
+        {{ message }}
         {% endfor %}
-      </ul>
+    </div>
     {% endif %}
 
-    <!-- Login Form -->
-    <form id="loginForm">
+    <form id="loginForm" method="POST">
       {% csrf_token %}
       <input type="text" id="username" name="username" placeholder="Username" required /><br /><br />
       <input type="password" id="password" name="password" placeholder="Password" required /><br /><br />
@@ -44,69 +25,33 @@
     <p>
       Don't have an account? <a href="{% url 'user-register' %}">Register here</a>
     </p>
-    {% comment %}
-    <script>
-      document.getElementById('loginForm').addEventListener('submit', function (event) {
-        event.preventDefault() // Prevent form default submission
-      
-        let username = document.getElementById('username').value
-        let password = document.getElementById('password').value
-      
-        fetch('http://127.0.0.1:8000/api/login/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, password })
-        })
-          .then((response) => response.json().then((data) => ({ status: response.status, body: data })))
-          .then(({ status, body }) => {
-            if (status === 200 && body.access_token) {
-              alert('Login successful!')
-      
-              // Store the JWT token in a cookie
-              document.cookie = `access_token=${body.access_token}; path=/; HttpOnly`
-      
-              // Redirect to home page
-              window.location.href = '/'
-            } else {
-              alert('Login failed: ' + (body.message || 'Invalid credentials'))
-            }
-          })
-          .catch((error) => {
-            alert('Error: ' + error)
-          })
-      })
-    </script> {% endcomment %}
 
     <script>
       document.getElementById('loginForm').addEventListener('submit', function (event) {
         event.preventDefault()
-      
+
         let username = document.getElementById('username').value
         let password = document.getElementById('password').value
-      
+
+        // Send login request to backend
         fetch('http://127.0.0.1:8000/api/login/', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ username, password })
         })
           .then((response) => response.json())
           .then((data) => {
-            if (data.access_token) {
-              // Store JWT in localStorage (not HttpOnly cookies)
-              console.log(data.access_token)
-              localStorage.setItem('access_token', data.access_token)
-              alert('Login successful!')
-              window.location.href = '/'
+            if (data.message === 'Login successful!') {
+              alert('Login successful!');
+              window.location.href = '/'; // Redirect to home page after successful login
             } else {
-              alert('Login failed: ' + data.message)
+              alert('Login failed: ' + data.message);
             }
           })
           .catch((error) => {
-            alert('Error: ' + error)
+            alert('Error: ' + error);
           })
       })
     </script>
