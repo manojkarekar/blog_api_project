@@ -5,16 +5,23 @@ from django.contrib import messages
 from django.contrib.auth import authenticate , logout , login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import requests
+import re
 
        
 def register_view(request):
     if request.method == 'POST':
+        fname = request.POST.get("fname")
+        lname = request.POST.get("lname")
         username = request.POST.get("username")
-        password = request.POST.get("password")
         email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirm_password = request.POST.get("confirm_password")
 
-        if not username or not password or not email:
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            messages.error(request, "Enter a valid email address.")
+            return redirect("user-register")
+        
+        if not username or not password or not email or not fname or not lname or not confirm_password:
             messages.error(request, "All fields are required")
             return redirect("user-register")
 
@@ -25,9 +32,14 @@ def register_view(request):
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email is already taken")
             return redirect("user-register")
+        
+        if password != confirm_password:
+            messages.error(request, "Password do not match")
+            return redirect("user-register")
+
 
         # Create user
-        user = User.objects.create_user(username=username, password=password, email=email)
+        user = User.objects.create_user(username=username,first_name=fname,last_name=lname,  password=password, email=email)
         user.save()
 
         messages.success(request, "User registered and logged in successfully!")
@@ -98,11 +110,18 @@ def login_view(request):
 #         # messages.success(request,"Logout successfully...")
 #         return response
     
+# @csrf_exempt
+# def logout_view(request):
+#     if request.method == 'POST':
+#         logout(request) 
+#         response = JsonResponse({"message": "Logout successful"})
+#         response.delete_cookie("sessionid")
+#         return redirect('user-login')
+
 @csrf_exempt
 def logout_view(request):
-    if request.method == 'POST':
-        logout(request) 
-        response = JsonResponse({"message": "Logout successful"})
-        response.delete_cookie("sessionid")
-        return response
-
+    if request.method in ["POST", "GET"]:  # ✅ Handle both GET and POST
+        logout(request)  # Logout the user
+        response = JsonResponse({"message": "Logout successful"}, status=200)
+        response.delete_cookie("sessionid")  # Remove session cookie
+        return response if request.headers.get("X-Requested-With") == "XMLHttpRequest" else redirect("user-login")

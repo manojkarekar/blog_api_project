@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile</title>
+  </head>
+  <body>
+    <h1>User Profile</h1>
+
+    <h2>Account Information</h2>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <h3>User Information</h3>
+      <p>
+        <strong>Username:</strong>
+        <input type="text" name="username" value="{{ form.username.value }}" />
+      </p>
+      <p>
+        <strong>First Name:</strong>
+        <input
+          type="text"
+          name="first_name"
+          value="{{ form.first_name.value }}"
+        />
+      </p>
+      <p>
+        <strong>Last Name:</strong>
+        <input
+          type="text"
+          name="last_name"
+          value="{{ form.last_name.value }}"
+        />
+      </p>
+      <p>
+        <strong>Email:</strong>
+        <input type="email" name="email" value="{{ form.email.value }}" />
+      </p>
+
+      <hr />
+
+      <h3>Profile Information</h3>
+      {{ form.as_p }}
+      <!-- Renders the rest of the profile fields (address, contact, etc.) -->
+
+      <button type="submit">Update Profile</button>
+    </form>
+  </body>
+</html>

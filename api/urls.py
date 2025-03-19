@@ -13,6 +13,9 @@ urlpatterns = [
 
 # all_users
     path('users/', ListUsers.as_view(), name='users'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('csrf/token/',CSRFTokenAPIView.as_view(), name='token_refresh'),
+    path("check-login/",CheckLoginAPIView.as_view(),name="check-user-login")
+    
 
 ]

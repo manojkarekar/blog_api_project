@@ -27,7 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://yourfrontend.com']  # Add your frontend URL
+CSRF_COOKIE_HTTPONLY = False  # Allow frontend to read CSRF token
+CSRF_USE_SESSIONS = False  # Store CSRF token in session
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,20 +40,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework_simplejwt.token_blacklist',
     "rest_framework",
+    'rest_framework.authtoken',
+    "corsheaders",
     "api",
     "user",
 
 ]
 
-# Django Rest Framework settings
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'django.contrib.auth.backends.ModelBackend',  
-    ],
-}
+
+
+
 
 from datetime import timedelta
 
@@ -62,14 +63,11 @@ SIMPLE_JWT = {
 }
 
 MIDDLEWARE = [
+      'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
-
-       'django.middleware.csrf.CsrfViewMiddleware', 
-
-       
     "django.contrib.sessions.middleware.SessionMiddleware",
+       'django.middleware.csrf.CsrfViewMiddleware', 
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -96,6 +94,16 @@ TEMPLATES = [
 WSGI_APPLICATION = "blog_api_project.wsgi.application"
 
 
+# Django Rest Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',  # ✅ Use Token Authentication
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # ✅ Secure APIs
+    ],
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -136,6 +144,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
+import os
 
 
 # Static files (CSS, JavaScript, Images)
@@ -143,10 +152,16 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),  # Common location for static files in development
+]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
 
 
 # api json render 

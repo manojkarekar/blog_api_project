@@ -1,66 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
-  </head>
-  <body>
-    <h1>Welcome</h1>
-
-    {% if user.is_authenticated %}
-    <p>Logged in as: {{ user.username }}</p>
-    <button id="logout">Logout</button>
+{% extends './pages/base.html' %} {% block main_container %}
+<div>
+  <div class="container d-flex justify-content-between">
+    {% if request.user.is_authenticated %}
+    <p>
+      Welcome, {{ request.user.first_name }} {{ request.user.last_name }}! You
+      are logged in.
+    </p>
+    <a href="#" id="logout" class="btn btn-info btn-sm">Logout</a>
     {% else %}
-    <p>User is not logged in</p>
-    <a href="{% url 'user-login' %}">Login</a>
+    <a href="{% url 'user-login' %}" class="btn btn-info btn-sm">Login</a>
     {% endif %}
-  </body>
+  </div>
 
-  <script>
-    let logoutButton = document.getElementById("logout");
+  <h1>Blogs</h1>
+</div>
+{% endblock main_container %} {% block custom_js %}
+<script>
+  $(document).ready(function () {
+    checkLoginStatus(); // ✅ Check user login status on page load
 
-    if (logoutButton) {
-      logoutButton.addEventListener("click", async function (event) {
-        event.preventDefault(); // Prevent default behavior
+    $("#logout").click(function (event) {
+      event.preventDefault();
+      logoutUser();
+    });
+  });
 
-        try {
-          // Send POST request to logout the user
-          const response = await fetch("/api/logout/", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": getCookie("csrftoken"), // ✅ Include CSRF token
-            },
-            credentials: "include", // ✅ Include cookies for session logout
-          });
+  // ✅ Function to check if user is already logged in
+  function checkLoginStatus() {
+    let authToken = localStorage.getItem("authToken");
 
-          if (response.ok) {
-            alert("Logout successful!");
-            window.location.href = "{% url 'user-login' %}"; // Redirect to login page
-          } else {
-            alert("Logout failed. Please try again.");
-          }
-        } catch (error) {
-          console.error("Logout error:", error);
+    if (!authToken) {
+      console.log("No auth token found. Redirecting to login...");
+      window.location.href = "/user/login/";
+      return;
+    }
+
+    $.ajax({
+      type: "GET",
+      url: "/api/check-login/",
+      headers: { Authorization: "Bearer " + authToken },
+      success: function (response) {
+        if (!response.logged_in) {
+          redirectToLogin();
+        }
+      },
+      error: function () {
+        redirectToLogin();
+      },
+    });
+  }
+
+  // ✅ Function to log out user
+  function logoutUser() {
+    $.ajax({
+      type: "POST",
+      url: "/user/logout/",
+      headers: { "X-CSRFToken": getCookie("csrftoken") },
+      success: function () {
+        localStorage.removeItem("authToken"); // ✅ Clear token
+        alert("Logout successful!");
+        window.location.href = "/user/login/";
+      },
+      error: function () {
+        alert("Logout failed! Please try again.");
+      },
+    });
+  }
+
+  // ✅ Redirect to login page and remove auth token
+  function redirectToLogin() {
+    localStorage.removeItem("authToken");
+    window.location.href = "/user/login/";
+  }
+
+  // ✅ Function to get CSRF token from cookies
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie) {
+      document.cookie.split(";").forEach((cookie) => {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.split("=")[1]);
         }
       });
     }
-
-    // ✅ Function to get CSRF token from cookies
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-        let cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-          let cookie = cookies[i].trim();
-          if (cookie.startsWith(name + "=")) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-  </script>
-</html>
+    return cookieValue;
+  }
+</script>
+{% endblock custom_js %}

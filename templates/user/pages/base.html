@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xtra Blog</title>
+    <link rel="stylesheet" href="{% static 'fontawesome/css/all.min.css' %}" />
+    <!-- https://fontawesome.com/ -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap"
+      rel="stylesheet"
+    />
+    <!-- https://fonts.google.com/ -->
+    <link href="{% static 'css/bootstrap.min.css' %}  " rel="stylesheet" />
+    <link href="{% static 'css/templatemo-xtra-blog.css' %}" rel="stylesheet" />
+
+    {% block custom_css %} {% endblock custom_css  %}
+  </head>
+
+  <body>
+    {% block sidebar %} {% include './sidebar.html' %} {% endblock sidebar %}
+    <div class="container-fluid">
+      <main class="tm-main">
+        {% block search %} {% include './search.html' %} {% endblock search %} 
+        {% block main_container %} {% endblock main_container %} 
+        {% block footer %} {% include './footer.html' %} {% endblock footer %}
+      </main>
+    </div>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/templatemo-script.js' %}"></script>
+
+    {% block custom_js %} {% endblock custom_js %}
+  </body>
+</html>

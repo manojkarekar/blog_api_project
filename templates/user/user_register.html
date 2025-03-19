@@ -1,30 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register</title>
-</head>
-<body>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include jQuery -->
+  </head>
+  <body>
     <h2>Register</h2>
 
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %};">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <ul id="messages"></ul>
 
-    <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="username" placeholder="Username" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
-        <input type="email" name="email" placeholder="Email" required><br><br>
-        <button type="submit">Register</button>
+    <form id="registerForm">
+      {% csrf_token %}
+      <input
+        type="text"
+        name="fname"
+        id="fname"
+        placeholder="fname"
+        required
+      /><br /><br />
+      <input
+        type="text"
+        name="lname"
+        id="lname"
+        placeholder="lname"
+        required
+      /><br /><br />
+      <input
+        type="text"
+        name="username"
+        id="username"
+        placeholder="Username"
+        required
+      /><br /><br />
+
+      <input
+        type="email"
+        name="email"
+        id="email"
+        placeholder="Email"
+        required
+      /><br /><br />
+
+      <input
+        type="password"
+        name="password"
+        id="password"
+        placeholder="Password"
+        required
+      /><br /><br />
+      <input
+        type="password"
+        name="c_password"
+        id="c_password"
+        placeholder="confirm password"
+        required
+      /><br /><br />
+      <button type="submit">Register</button>
     </form>
 
-    <p>Already have an account? <a href="{% url 'user-login' %}">Login here</a></p>
+    <p>
+      Already have an account? <a href="{% url 'user-login' %}">Login here</a>
+    </p>
 
-</body>
+    <script>
+      $(document).ready(function () {
+        $("#registerForm").submit(function (event) {
+          event.preventDefault(); // Prevent form from reloading the page
+
+          var formData = {
+            username: $("#username").val(),
+            password: $("#password").val(),
+            email: $("#email").val(),
+            first_name: $("#fname").val(),
+            last_name: $("#lname").val(),
+          };
+
+          $.ajax({
+            type: "POST",
+            url: "/api/register/", // ✅ Update this with your API URL
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }, // ✅ Include CSRF token
+            success: function (response) {
+              $("#messages").html(
+                `<li style="color: green;">${response.message}</li>`
+              );
+              $("#registerForm")[0].reset(); // Clear the form
+            },
+            error: function (xhr) {
+              let errorMessage = "Something went wrong!";
+              if (xhr.responseJSON) {
+                errorMessage =
+                  xhr.responseJSON[Object.keys(xhr.responseJSON)[0]];
+              }
+              $("#messages").html(
+                `<li style="color: red;">${errorMessage}</li>`
+              );
+            },
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
