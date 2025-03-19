@@ -1,18 +1,30 @@
 {% extends './pages/base.html' %} {% block main_container %}
 <div>
-  <div class="container d-flex justify-content-between">
-    {% if request.user.is_authenticated %}
-    <p>
-      Welcome, {{ request.user.first_name }} {{ request.user.last_name }}! You
-      are logged in.
-    </p>
-    <a href="#" id="logout" class="btn btn-info btn-sm">Logout</a>
-    {% else %}
-    <a href="{% url 'user-login' %}" class="btn btn-info btn-sm">Login</a>
-    {% endif %}
-  </div>
 
   <h1>Blogs</h1>
+  <div class="container">
+    <div class="row ">
+    
+      <div class="card col-md-6" style="width: 18rem;">
+        <img src="..." class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+          <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+      </div>
+
+      <div class="card col-md-6" style="width: 18rem;">
+        <img src="..." class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">Card title</h5>
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+          <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 {% endblock main_container %} {% block custom_js %}
 <script>

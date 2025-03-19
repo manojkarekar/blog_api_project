@@ -10,8 +10,8 @@ def index(request):
 
 @login_required
 def user_profile(request):
-    user = request.user  # Get the logged-in user
-    profile, created = Profile.objects.get_or_create(user=user)  # Get or create the user's profile
+    user = request.user  # get the login user
+    profile, created = Profile.objects.get_or_create(user=user)  #get or create a user profile
 
     if request.method == 'POST':
         # Pass the user to the form
@@ -27,7 +27,7 @@ def user_profile(request):
             # Save the profile fields
             form.save()
 
-            return redirect('user_profile')  # Redirect to the same page after saving
+            return redirect('/')  # Redirect to the same page after saving
 
     else:
         # Pass the user to pre-fill form

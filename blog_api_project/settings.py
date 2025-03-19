@@ -163,6 +163,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 
+# This setting defines the URL to use for accessing media files.
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 
 # api json render 
 REST_FRAMEWORK = {
@@ -171,3 +176,5 @@ REST_FRAMEWORK = {
         # 'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
+
+
