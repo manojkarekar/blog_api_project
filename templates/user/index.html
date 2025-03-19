@@ -1,102 +1,124 @@
 {% extends './pages/base.html' %} {% block main_container %}
-<div>
+  <div>
+    <h1>Blogs</h1>
+    <div class="container">
+      <div class="row">
 
-  <h1>Blogs</h1>
-  <div class="container">
-    <div class="row ">
-    
-      <div class="card col-md-6" style="width: 18rem;">
-        <img src="..." class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+
+        {% for blog_data in blogs_data %}
+        <div class="blog-post">
+            <h2><a href="{% url 'blog-detail' blog_data.blog.id %}">{{ blog_data.blog.title }}</a></h2>
+            <p>By {{ blog_data.blog.user.first_name }} {{ blog_data.blog.user.last_name }} on {{ blog_data.blog.created_at }}</p>
+            <p>{{ blog_data.blog.content|slice:":100" }}...</p>
+            
+            {% if blog_data.blog.image %}
+                <img src="{{ blog_data.blog.image.url }}" alt="{{ blog_data.blog.title }} Image" style="max-width: 150px; height: auto;">
+            {% endif %}
+            
+            <p><strong>Likes: </strong>{{ blog_data.likes }}</p>
+            <p>
+                {% if blog_data.user_liked %}
+                    <button class="btn btn-outline-danger" disabled>Liked</button>
+                {% else %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="blog_id" value="{{ blog_data.blog.id }}">
+                        <button type="submit" name="like" class="btn btn-outline-success">Like</button>
+                    </form>
+                {% endif %}
+            </p>
+
+            <p><strong>Comments:</strong></p>
+            {% for comment in blog_data.comments %}
+                <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+            {% endfor %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="blog_id" value="{{ blog_data.blog.id }}">
+                {{ form.as_p }}
+                <button type="submit" name="comment" class="btn btn-primary">Add Comment</button>
+            </form>
         </div>
-      </div>
+    {% empty %}
+        <p>No blogs available.</p>
+    {% endfor %}
 
-      <div class="card col-md-6" style="width: 18rem;">
-        <img src="..." class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">Card title</h5>
-          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
-        </div>
-      </div>
 
+      </div>
     </div>
   </div>
-</div>
-{% endblock main_container %} {% block custom_js %}
-<script>
-  $(document).ready(function () {
-    checkLoginStatus(); // ✅ Check user login status on page load
-
-    $("#logout").click(function (event) {
-      event.preventDefault();
-      logoutUser();
-    });
-  });
-
-  // ✅ Function to check if user is already logged in
-  function checkLoginStatus() {
-    let authToken = localStorage.getItem("authToken");
-
-    if (!authToken) {
-      console.log("No auth token found. Redirecting to login...");
-      window.location.href = "/user/login/";
-      return;
-    }
-
-    $.ajax({
-      type: "GET",
-      url: "/api/check-login/",
-      headers: { Authorization: "Bearer " + authToken },
-      success: function (response) {
-        if (!response.logged_in) {
-          redirectToLogin();
+{% endblock %} {% block custom_js %}
+  <script>
+    $(document).ready(function () {
+      checkLoginStatus() // ✅ Check user login status on page load
+    
+      $('#logout').click(function (event) {
+        event.preventDefault()
+        logoutUser()
+      })
+    })
+    
+    // ✅ Function to check if user is already logged in
+    function checkLoginStatus() {
+      let authToken = localStorage.getItem('authToken')
+    
+      if (!authToken) {
+        console.log('No auth token found. Redirecting to login...')
+        window.location.href = '/user/login/'
+        return
+      }
+    
+      $.ajax({
+        type: 'GET',
+        url: '/api/check-login/',
+        headers: { Authorization: 'Bearer ' + authToken },
+        success: function (response) {
+          if (!response.logged_in) {
+            redirectToLogin()
+          }
+        },
+        error: function () {
+          redirectToLogin()
         }
-      },
-      error: function () {
-        redirectToLogin();
-      },
-    });
-  }
-
-  // ✅ Function to log out user
-  function logoutUser() {
-    $.ajax({
-      type: "POST",
-      url: "/user/logout/",
-      headers: { "X-CSRFToken": getCookie("csrftoken") },
-      success: function () {
-        localStorage.removeItem("authToken"); // ✅ Clear token
-        alert("Logout successful!");
-        window.location.href = "/user/login/";
-      },
-      error: function () {
-        alert("Logout failed! Please try again.");
-      },
-    });
-  }
-
-  // ✅ Redirect to login page and remove auth token
-  function redirectToLogin() {
-    localStorage.removeItem("authToken");
-    window.location.href = "/user/login/";
-  }
-
-  // ✅ Function to get CSRF token from cookies
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie) {
-      document.cookie.split(";").forEach((cookie) => {
-        cookie = cookie.trim();
-        if (cookie.startsWith(name + "=")) {
-          cookieValue = decodeURIComponent(cookie.split("=")[1]);
-        }
-      });
+      })
     }
-    return cookieValue;
-  }
-</script>
-{% endblock custom_js %}
+    
+    // ✅ Function to log out user
+    function logoutUser() {
+      $.ajax({
+        type: 'POST',
+        url: '/user/logout/',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        success: function () {
+          localStorage.removeItem('authToken') // ✅ Clear token
+          alert('Logout successful!')
+          window.location.href = '/user/login/'
+        },
+        error: function () {
+          alert('Logout failed! Please try again.')
+        }
+      })
+    }
+    
+    // ✅ Redirect to login page and remove auth token
+    function redirectToLogin() {
+      localStorage.removeItem('authToken')
+      window.location.href = '/user/login/'
+    }
+    
+    // ✅ Function to get CSRF token from cookies
+    function getCookie(name) {
+      let cookieValue = null
+      if (document.cookie) {
+        document.cookie.split(';').forEach((cookie) => {
+          cookie = cookie.trim()
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.split('=')[1])
+          }
+        })
+      }
+      return cookieValue
+    }
+  </script>
+{% endblock %}

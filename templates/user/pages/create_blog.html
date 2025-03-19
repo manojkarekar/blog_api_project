@@ -1,0 +1,11 @@
+{% comment %} {% extends './base.html' %} {% endcomment %}
+
+{% block main_container %}
+    <h1>Create a New Blog</h1>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Create Blog</button>
+    </form>
+{% endblock main_container %}

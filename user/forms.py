@@ -1,7 +1,7 @@
 from django import forms
-from .models import Profile
-from django.contrib.auth.models import User
-
+from .models import Profile , Comment , Blog
+from django.contrib.auth.models import User 
+ 
 class ProfileForm(forms.ModelForm):
     # Add the user model fields that are editable for the Profile form
     username = forms.CharField(max_length=150)
@@ -81,3 +81,38 @@ class ProfileForm(forms.ModelForm):
             self.fields['first_name'].initial = user.first_name
             self.fields['last_name'].initial = user.last_name
             self.fields['email'].initial = user.email
+
+class BlogForm(forms.ModelForm):
+    class Meta:
+        model = Blog
+        fields = ['title', 'content', 'category', 'image']  # Include the required fields
+
+    # Customizing the form widgets and labels
+    widgets = {
+        'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Blog Title'}),
+        'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter Blog Content'}),
+        'category': forms.Select(attrs={'class': 'form-control'}),
+        'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+    }
+
+    labels = {
+        'title': 'Blog Title',
+        'content': 'Content',
+        'category': 'Category',
+        'image': 'Blog Image',
+    }
+
+    # Optionally, you can add additional validation or cleaning methods here
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if len(title) < 5:
+            raise forms.ValidationError("Title must be at least 5 characters.")
+        return title
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your comment here...'})
+        }

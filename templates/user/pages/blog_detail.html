@@ -1,0 +1,41 @@
+<!-- blog_detail.html -->
+{% comment %} {% extends '/base.html' %} {% endcomment %}
+
+{% block content %}
+    <h1>{{ blog.title }}</h1>
+    <p>Category: {{ blog.category.name }}</p>
+    <p>Created by {{ blog.user.first_name }} {{ blog.user.last_name }} on {{ blog.created_at|date:"F d, Y" }}</p>
+    
+    {% if blog.image %}
+        <img src="{{ blog.image.url }}" alt="{{ blog.title }}" style="max-width:200px; height: 200px;">
+    {% endif %}
+    
+    <p>{{ blog.content }}</p>
+    
+    <!-- Like functionality -->
+    <p>Likes: {{ likes }}</p>
+    {% if user_liked %}
+        <p>You already liked this blog</p>
+    {% else %}
+        <form method="POST" action="{% url 'like-blog' blog.id %}">
+            {% csrf_token %}
+            <button type="submit">Like</button>
+        </form>
+    {% endif %}
+
+    <!-- Comment Section -->
+    <h3>Comments</h3>
+    {% for comment in comments %}
+        <div>
+            <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+        </div>
+    {% endfor %}
+
+    <h4>Add a Comment</h4>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Post Comment</button>
+    </form>
+
+{% endblock %}

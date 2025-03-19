@@ -1,11 +1,51 @@
-from django.shortcuts import render , redirect
-from .forms import ProfileForm
-from .models import Profile
+from django.shortcuts import render , redirect , get_object_or_404
+from .forms import ProfileForm , CommentForm , BlogForm
+from .models import Profile , BlogLike ,Blog ,Comment , BlogView
 from django.contrib.auth.decorators import login_required
 
 
 def index(request):
-    return render(request, "user/index.html")
+    blogs = Blog.objects.all().order_by('-created_at')
+    
+    # Track blog views for the current user
+    for blog in blogs:
+        BlogView.objects.get_or_create(blog=blog, user=request.user)
+    
+    # Handle comment and like actions for each blog
+    if request.method == 'POST':
+        if 'comment' in request.POST:
+            # Handle comment submission
+            blog_id = request.POST.get('blog_id')
+            blog = Blog.objects.get(id=blog_id)
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.blog = blog
+                comment.user = request.user
+                comment.save()
+        elif 'like' in request.POST:
+            # Handle like submission
+            blog_id = request.POST.get('blog_id')
+            blog = Blog.objects.get(id=blog_id)
+            BlogLike.objects.get_or_create(blog=blog, user=request.user)
+    
+    # Get comments, likes, and view data for each blog
+    blogs_data = []
+    for blog in blogs:
+        blog_likes = BlogLike.objects.filter(blog=blog)
+        user_liked = BlogLike.objects.filter(blog=blog, user=request.user).exists()
+        comments = Comment.objects.filter(blog=blog)
+        blogs_data.append({
+            'blog': blog,
+            'likes': blog_likes.count(),
+            'user_liked': user_liked,
+            'comments': comments,
+        })
+
+    return render(request, "user/index.html", {
+        'blogs_data': blogs_data,
+        'form': CommentForm(),  # For adding comments
+    })
 
 
 @login_required
@@ -39,5 +79,96 @@ def user_profile(request):
     })
 
 
+@login_required
+def create_blog(request):
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES)  # Ensure we handle file uploads
+        if form.is_valid():
+            blog = form.save(commit=False)
+            blog.user = request.user  # Set the current user as the blog author
+            blog.save()
+            return redirect('blog-detail', blog_id=blog.id)  # Redirect to the newly created blog's detail page
+    else:
+        form = BlogForm()
+
+    return render(request, 'user\pages\create_blog.html', {'form': form})
+
+@login_required
+def edit_blog(request, blog_id):
+    blog = Blog.objects.get(id=blog_id)
+
+    if request.user != blog.user:
+        # Ensure only the blog owner can edit the blog
+        return redirect('blog-detail', blog_id=blog.id)
+
+    if request.method == 'POST':
+        form = BlogForm(request.POST, request.FILES, instance=blog)  # Include the existing blog data
+        if form.is_valid():
+            form.save()
+            return redirect('blog-detail', blog_id=blog.id)  # Redirect to the blog's detail page
+    else:
+        form = BlogForm(instance=blog)
+
+    return render(request, 'edit_blog.html', {'form': form, 'blog': blog})
+
+@login_required
+def like_blog(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    
+    # If the user has already liked this blog, don't do anything
+    if BlogLike.objects.filter(blog=blog, user=request.user).exists():
+        return redirect('blog-detail', blog_id=blog.id)
+
+    # Create a new like entry
+    BlogLike.objects.create(blog=blog, user=request.user)
+    
+    return redirect('blog-detail', blog_id=blog.id)
 
 
+@login_required
+def add_comment(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.blog = blog
+            comment.user = request.user
+            comment.save()
+            return redirect('blog-detail', blog_id=blog.id)
+    else:
+        form = CommentForm()
+
+    return render(request, 'add_comment.html', {'form': form, 'blog': blog})
+
+
+@login_required
+def blog_detail(request, blog_id):
+    blog = get_object_or_404(Blog, id=blog_id)
+
+    # Track the view
+    BlogView.objects.get_or_create(blog=blog, user=request.user)
+    
+    # Handle comment submission
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.blog = blog
+            comment.user = request.user
+            comment.save()
+
+    # Handle likes
+    blog_likes = BlogLike.objects.filter(blog=blog)
+    user_liked = BlogLike.objects.filter(blog=blog, user=request.user).exists()
+
+    comments = Comment.objects.filter(blog=blog)
+
+    return render(request, 'user/pages/blog_detail.html', {
+        'blog': blog,
+        'comments': comments,
+        'form': CommentForm(),
+        'likes': blog_likes.count(),
+        'user_liked': user_liked,
+    })
