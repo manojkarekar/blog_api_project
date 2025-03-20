@@ -23,22 +23,22 @@ def index(request):
                 comment.blog = blog
                 comment.user = request.user
                 comment.save()
-        elif 'like' in request.POST:
-            # Handle like submission
-            blog_id = request.POST.get('blog_id')
-            blog = Blog.objects.get(id=blog_id)
-            BlogLike.objects.get_or_create(blog=blog, user=request.user)
+        # elif 'like' in request.POST:
+        #     # Handle like submission
+        #     blog_id = request.POST.get('blog_id')
+        #     blog = Blog.objects.get(id=blog_id)
+        #     BlogLike.objects.get_or_create(blog=blog, user=request.user)
     
     # Get comments, likes, and view data for each blog
     blogs_data = []
     for blog in blogs:
         blog_likes = BlogLike.objects.filter(blog=blog)
-        user_liked = BlogLike.objects.filter(blog=blog, user=request.user).exists()
+        # user_liked = BlogLike.objects.filter(blog=blog, user=request.user).exists()
         comments = Comment.objects.filter(blog=blog)
         blogs_data.append({
             'blog': blog,
-            'likes': blog_likes.count(),
-            'user_liked': user_liked,
+            'likes_count': blog_likes.count(),
+            # 'user_liked': user_liked,
             'comments': comments,
         })
 
@@ -114,15 +114,18 @@ def edit_blog(request, blog_id):
 @login_required
 def like_blog(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id)
+    print(blog)
     
     # If the user has already liked this blog, don't do anything
-    if BlogLike.objects.filter(blog=blog, user=request.user).exists():
-        return redirect('blog-detail', blog_id=blog.id)
-
-    # Create a new like entry
-    BlogLike.objects.create(blog=blog, user=request.user)
-    
-    return redirect('blog-detail', blog_id=blog.id)
+    if BlogLike.objects.filter(user=request.user,blog=blog).exists():
+        like = BlogLike.objects.filter(user=request.user,blog=blog).first()
+        if like:
+            like.delete()
+          
+    else:
+        BlogLike.objects.create(user=request.user,blog=blog)
+          
+    return redirect("/")
 
 
 @login_required

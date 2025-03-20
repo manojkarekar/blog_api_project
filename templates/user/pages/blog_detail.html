@@ -1,41 +1,53 @@
-<!-- blog_detail.html -->
-{% comment %} {% extends '/base.html' %} {% endcomment %}
+{% comment %} {% extends 'base.html' %} {% endcomment %} {% block content %}
+<h1>{{ blog.title }}</h1>
+<p>Category: {{ blog.category.name }}</p>
+<p>
+  Created by {{ blog.user.first_name }} {{ blog.user.last_name }} on {{
+  blog.created_at|date:"F d, Y" }}
+</p>
 
-{% block content %}
-    <h1>{{ blog.title }}</h1>
-    <p>Category: {{ blog.category.name }}</p>
-    <p>Created by {{ blog.user.first_name }} {{ blog.user.last_name }} on {{ blog.created_at|date:"F d, Y" }}</p>
-    
-    {% if blog.image %}
-        <img src="{{ blog.image.url }}" alt="{{ blog.title }}" style="max-width:200px; height: 200px;">
-    {% endif %}
-    
-    <p>{{ blog.content }}</p>
-    
-    <!-- Like functionality -->
-    <p>Likes: {{ likes }}</p>
-    {% if user_liked %}
-        <p>You already liked this blog</p>
-    {% else %}
-        <form method="POST" action="{% url 'like-blog' blog.id %}">
-            {% csrf_token %}
-            <button type="submit">Like</button>
-        </form>
-    {% endif %}
+{% if blog.image %}
+<img
+  src="{{ blog.image.url }}"
+  alt="{{ blog.title }}"
+  style="max-width: 200px; height: 200px"
+/>
+{% endif %}
 
-    <!-- Comment Section -->
-    <h3>Comments</h3>
-    {% for comment in comments %}
-        <div>
-            <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
-        </div>
-    {% endfor %}
+<p>{{ blog.content }}</p>
 
-    <h4>Add a Comment</h4>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Post Comment</button>
-    </form>
+<!-- Display likes -->
+<p><strong>Likes: {{ blog.likes.count }}</strong></p>
+<!-- Displays the count of likes -->
+
+{% if user.is_authenticated %} {% if user in blog.likes.all %}
+<!-- If the user has already liked the blog, show 'Unlike' button -->
+<form method="POST" action="{% url 'like-blog' blog.id %}">
+  {% csrf_token %}
+  <button type="submit">Unlike</button>
+</form>
+{% else %}
+<!-- If the user has not liked the blog, show 'Like' button -->
+<form method="POST" action="{% url 'like-blog' blog.id %}">
+  {% csrf_token %}
+  <button type="submit">Like</button>
+</form>
+{% endif %} {% else %}
+<p>You need to be logged in to like/unlike this blog.</p>
+{% endif %}
+
+<!-- Comment Section -->
+<h3>Comments</h3>
+{% for comment in comments %}
+<div>
+  <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+</div>
+{% endfor %}
+
+<h4>Add a Comment</h4>
+<form method="POST">
+  {% csrf_token %} {{ form.as_p }}
+  <button type="submit">Post Comment</button>
+</form>
 
 {% endblock %}
