@@ -64,6 +64,20 @@
                 <strong>Likes: {{ blog_data.likes_count }}</strong>
               </p>
 
+              
+              {% for comment in blog_data.comments %}
+              <p>
+                <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
+              </p>
+            {% endfor %}
+
+            <form method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="blog_id" value="{{ blog_data.blog.id }}" />
+              {{ form.as_p }}
+              <button type="submit" name="comment" class="btn btn-primary">Add Comment</button>
+            </form>
+
             
             </div>
           </div>
@@ -98,21 +112,10 @@
             </p>
             {% endcomment %}
 
-            <p>
+            {% comment %} <p>
               <strong>Comments:</strong>
             </p>
-            {% for comment in blog_data.comments %}
-              <p>
-                <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
-              </p>
-            {% endfor %}
-
-            <form method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="blog_id" value="{{ blog_data.blog.id }}" />
-              {{ form.as_p }}
-              <button type="submit" name="comment" class="btn btn-primary">Add Comment</button>
-            </form>
+          {% endcomment %}
           </div>
         {% empty %}
           <p>No blogs available.</p>

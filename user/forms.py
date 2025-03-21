@@ -66,7 +66,7 @@ class ProfileForm(forms.ModelForm):
             })
         }
 
-        # apply the custom labels and widgets to the fields
+        # apply the custom labels and widgets to the form fields
         for field_name, label in labels.items():
             if field_name in self.fields:
                 self.fields[field_name].label = label

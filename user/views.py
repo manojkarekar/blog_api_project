@@ -4,6 +4,7 @@ from .models import Profile , BlogLike ,Blog ,Comment , BlogView
 from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def index(request):
     blogs = Blog.objects.all().order_by('-created_at')
     
