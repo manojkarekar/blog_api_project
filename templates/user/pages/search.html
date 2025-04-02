@@ -1,15 +1,17 @@
 <div class="container d-flex justify-content-between align-items-center">
   {% if request.user.is_authenticated %}
   <p>
-    Welcome, {{ request.user.first_name }} {{ request.user.last_name }}! You
-    are logged in.
+    Welcome, {{ request.user.first_name }} {{ request.user.last_name }}! You are
+    logged in.
   </p>
-  <a href="#" id="logout" class="btn btn-info ">Logout</a>
+  <a href="#" id="logout" class="btn btn-info">Logout</a>
+  <a href="{% url 'create-blog' %}" id="logout" class="btn btn-info"
+    >Add Blog</a
+  >
   {% else %}
   <a href="{% url 'user-login' %}" class="btn btn-info btn-sm">Login</a>
   {% endif %}
 </div>
-
 
 <div class="row tm-row">
   <div class="col-12">

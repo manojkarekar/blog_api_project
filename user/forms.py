@@ -85,29 +85,27 @@ class ProfileForm(forms.ModelForm):
 class BlogForm(forms.ModelForm):
     class Meta:
         model = Blog
-        fields = ['title', 'content', 'category', 'image']  # Include the required fields
+        fields = ['title', 'content', 'category', 'image']
 
-    # Customizing the form widgets and labels
-    widgets = {
-        'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Blog Title'}),
-        'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter Blog Content'}),
-        'category': forms.Select(attrs={'class': 'form-control'}),
-        'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
-    }
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Blog Title'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter Blog Content'}),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
 
-    labels = {
-        'title': 'Blog Title',
-        'content': 'Content',
-        'category': 'Category',
-        'image': 'Blog Image',
-    }
+        labels = {
+            'title': 'Enter your blog title',
+            'content': 'Enter your blog content',
+            'category': 'Select your blog catergory',
+            'image': 'Select you blog image',
+        }
 
-    # Optionally, you can add additional validation or cleaning methods here
-    def clean_title(self):
-        title = self.cleaned_data.get('title')
-        if len(title) < 5:
-            raise forms.ValidationError("Title must be at least 5 characters.")
-        return title
+        def clean_title(self):
+            title = self.cleaned_data.get('title')
+            if len(title) < 5:
+                raise forms.ValidationError("Title must be at least 5 characters.")
+            return title
 
 class CommentForm(forms.ModelForm):
     class Meta:

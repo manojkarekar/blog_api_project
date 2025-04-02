@@ -4,7 +4,6 @@ from .models import Profile , BlogLike ,Blog ,Comment , BlogView
 from django.contrib.auth.decorators import login_required
 
 
-@login_required
 def index(request):
     blogs = Blog.objects.all().order_by('-created_at')
     
@@ -88,10 +87,10 @@ def create_blog(request):
             blog = form.save(commit=False)
             blog.user = request.user  # Set the current user as the blog author
             blog.save()
-            return redirect('blog-detail', blog_id=blog.id)  # Redirect to the newly created blog's detail page
+            return redirect('index')  # Redirect to the newly created blog's detail page
     else:
         form = BlogForm()
-
+    
     return render(request, 'user\pages\create_blog.html', {'form': form})
 
 @login_required

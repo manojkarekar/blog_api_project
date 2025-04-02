@@ -1,11 +1,68 @@
-{% comment %} {% extends './base.html' %} {% endcomment %}
+{% extends './user/pages/base.html' %} {% block main_container %}
+<h1>Create a New Blog</h1>
 
-{% block main_container %}
-    <h1>Create a New Blog</h1>
-    
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Create Blog</button>
-    </form>
-{% endblock main_container %}
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <!-- Title Field -->
+  <div class="form-group">
+    <label for="{{ form.title.id_for_label }}"> {{form.title.label}} </label>
+    {{ form.title }}
+    <!-- This will now use the custom widget for the 'title' field -->
+    {% if form.title.errors %}
+    <div class="alert alert-danger">
+      {% for error in form.title.errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Content Field -->
+  <div class="form-group">
+    <label for="{{ form.content.id_for_label }}">{{form.content.label}}</label>
+    {{ form.content }}
+    <!-- This will now use the custom widget for the 'content' field -->
+    {% if form.content.errors %}
+    <div class="alert alert-danger">
+      {% for error in form.content.errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Category Field -->
+  <div class="form-group">
+    <label for="{{ form.category.id_for_label }}"
+      >{{form.category.label}}</label
+    >
+    {{ form.category }}
+    <!-- This will now use the custom widget for the 'category' field -->
+    {% if form.category.errors %}
+    <div class="alert alert-danger">
+      {% for error in form.category.errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Image Field -->
+  <div class="form-group">
+    <label for="{{ form.image.id_for_label }}">{{form.image.label}}</label>
+    <br />
+    {{ form.image }}
+    <!-- This will now use the custom widget for the 'image' field -->
+    {% if form.image.errors %}
+    <div class="alert alert-danger">
+      {% for error in form.image.errors %}
+      <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <button type="submit" class="btn btn-primary my-3">Create Blog</button>
+</form>
+{% endblock %}

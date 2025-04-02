@@ -1,5 +1,4 @@
-{% extends './base.html' %} 
-{% block main_container %}
+{% extends './base.html' %} {% block main_container %}
 
 <h3 class="alert alert-success text-center p-2">Update Your Profile</h3>
 
@@ -7,20 +6,24 @@
   {% csrf_token %}
 
   <div class="form-group">
-    <label for="{{form.first_name.id_for_label}}">{{form.first_name.label}}</label>
+    <label for="{{form.first_name.id_for_label}}"
+      >{{form.first_name.label}}</label
+    >
     {{ form.first_name }}
   </div>
-  
+
   <div class="form-group">
-    <label for="{{form.last_name.id_for_label}}">{{form.last_name.label}}</label>
+    <label for="{{form.last_name.id_for_label}}"
+      >{{form.last_name.label}}</label
+    >
     {{ form.last_name }}
   </div>
-  
+
   <div class="form-group">
     <label for="{{form.email.id_for_label}}">{{form.email.label}}</label>
     {{ form.email }}
   </div>
-  
+
   <div class="form-group">
     <label for="{{form.username.id_for_label}}">{{form.username.label}}</label>
     {{ form.username }}
@@ -31,19 +34,20 @@
     <label for="{{form.address.id_for_label}}">{{form.address.label}}</label>
     {{ form.address }}
   </div>
-  
+
   <div class="form-group">
     <label for="{{form.contact.id_for_label}}">{{form.contact.label}}</label>
     {{ form.contact }}
   </div>
-  
+
   <div class="form-group">
-    <label for="{{form.profile_pic.id_for_label}}">{{form.profile_pic.label}}</label>
+    <label for="{{form.profile_pic.id_for_label}}"
+      >{{form.profile_pic.label}}</label
+    >
     {{ form.profile_pic }}
   </div>
 
   <button type="submit" class="btn btn-primary">Update Profile</button>
-
 </form>
 
 {% endblock main_container %}
