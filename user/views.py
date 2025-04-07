@@ -2,6 +2,7 @@ from django.shortcuts import render , redirect , get_object_or_404
 from .forms import ProfileForm , CommentForm , BlogForm
 from .models import Profile , BlogLike ,Blog ,Comment , BlogView
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 
 def index(request):
@@ -111,18 +112,19 @@ def edit_blog(request, blog_id):
 @login_required
 def like_blog(request, blog_id):
     blog = get_object_or_404(Blog, id=blog_id)
-    print(blog)
     
-    # If the user has already liked this blog, don't do anything
-    if BlogLike.objects.filter(user=request.user,blog=blog).exists():
-        like = BlogLike.objects.filter(user=request.user,blog=blog).first()
-        if like:
-            like.delete()
-          
+    if BlogLike.objects.filter(user=request.user, blog=blog).exists():
+        like = BlogLike.objects.filter(user=request.user, blog=blog).first()
+        like.delete()
+        liked = False
     else:
-        BlogLike.objects.create(user=request.user,blog=blog)
-          
-    return redirect("/")
+        BlogLike.objects.create(user=request.user, blog=blog)
+        liked = True
+    
+    return JsonResponse({
+        'liked': liked,
+        'likes_count': BlogLike.objects.filter(blog=blog).count()
+    })
 
 
 @login_required
