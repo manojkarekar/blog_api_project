@@ -7,14 +7,14 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     blogs = Blog.objects.all().order_by('-created_at')
     
-    # Track blog views for the current user
-    for blog in blogs:
-        BlogView.objects.get_or_create(blog=blog, user=request.user)
+    # Track blog views for the current user if authenticated
+    # if request.user.is_authenticated:
+    #     for blog in blogs:
+    #         BlogView.objects.get_or_create(blog=blog, user=request.user)
     
     # Handle comment and like actions for each blog
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_authenticated:
         if 'comment' in request.POST:
-            # Handle comment submission
             blog_id = request.POST.get('blog_id')
             blog = Blog.objects.get(id=blog_id)
             form = CommentForm(request.POST)
@@ -28,20 +28,17 @@ def index(request):
         #     blog_id = request.POST.get('blog_id')
         #     blog = Blog.objects.get(id=blog_id)
         #     BlogLike.objects.get_or_create(blog=blog, user=request.user)
-    
+
     # Get comments, likes, and view data for each blog
     blogs_data = []
     for blog in blogs:
         blog_likes = BlogLike.objects.filter(blog=blog)
-        # user_liked = BlogLike.objects.filter(blog=blog, user=request.user).exists()
         comments = Comment.objects.filter(blog=blog)
         blogs_data.append({
             'blog': blog,
             'likes_count': blog_likes.count(),
-            # 'user_liked': user_liked,
             'comments': comments,
         })
-
     return render(request, "user/index.html", {
         'blogs_data': blogs_data,
         'form': CommentForm(),  # For adding comments

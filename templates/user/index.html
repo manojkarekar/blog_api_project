@@ -1,177 +1,125 @@
-{% extends './pages/base.html' %} {% block main_container %} 
-{% block custom_css %}
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-  integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
-{% endblock %}
-<div>
-  <h1>All Blogs</h1>
+{% extends './pages/base.html' %} {% block main_container %}
+  {% block custom_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  {% endblock %}
+  <div>
+    <div class="d-flex justify-content-between my-3">
+      <h1>All Blogs</h1>
+      {% if user.is_authenticated %}
+        <a href="{% url 'create-blog' %}" class="btn btn-info align-self-center">Add Blog</a>
+      {% endif %}
+    </div>
 
-  {% comment %} This is the block container {% endcomment %}
-  <div class="container">
-    <div class="row">
-      {% for blog_data in blogs_data %}
-      <div class="card" style="width: 20rem">
-
-        {% comment %} show the blog image {% endcomment %} 
-        {% if blog_data.blog.image %}
-        <img width="100%" height="200px"
-          src="{{ blog_data.blog.image.url }}"
-          class="card-img-top"
-          alt="{{ blog_data.blog.title }} Image"
-        />
-        {% endif %}
-
-        <div class="card-body">
-          <h5 class="card-title">{{ blog_data.blog.title }}</h5>
-          <p class="card-text">{{ blog_data.blog.content|slice:':100' }}...</p>
-          <a href="#" class="btn btn-primary">Read more</a>
-       
-
-          <ul class="d-flex w-100 border border-1 justify-content-end">
-            {% if user.is_authenticated %}
-                <i
-                  class="fa-solid fa-thumbs-up like-icon"
-                  onclick="like_login_form(event)"
-                  style="color: #74c0fc; cursor: pointer"
-                ></i>
-              </form>
-              {% else %}
-            </li>
-
-            <li class="list-unstyled mx-2">
-              <i class="fa-solid fa-comment"></i>
-            </li>
-            <li class="list-unstyled mx-2">
-              <i class="fa-solid fa-eye"></i>
-            </li>
-
+    <div class="container">
+      <div class="row">
+        {% for blog_data in blogs_data %}
+          <div class="card" style="width: 20rem">
+            {% if blog_data.blog.image %}
+              <img width="100%" height="200px" src="{{ blog_data.blog.image.url }}" class="card-img-top" alt="{{ blog_data.blog.title }} Image" />
             {% endif %}
-          </ul>
 
-          <p>
-            <strong>Likes: {{ blog_data.likes_count }}</strong>
-          </p>
+            <div class="card-body">
+              <h5 class="card-title">{{ blog_data.blog.title }}</h5>
+              <p class="card-text">{{ blog_data.blog.content|slice:':100' }}...</p>
+              <a href="#" class="btn btn-primary">Read more</a>
 
+              <ul class="d-flex w-100 border border-1 justify-content-end">
+                {% if user.is_authenticated %}
+                  <li class="list-unstyled mx-2">
+                    <i class="fa-solid fa-thumbs-up like-icon" onclick="like_login_form(event)" style="color: #74c0fc; cursor: pointer"></i>
+                  </li>
+                {% else %}
+                  <li class="list-unstyled mx-2">
+                    <i class="fa-solid fa-comment"></i>
+                  </li>
+                  <li class="list-unstyled mx-2">
+                    <i class="fa-solid fa-eye"></i>
+                  </li>
+                {% endif %}
+              </ul>
 
-          {% comment %} {% for comment in blog_data.comments %}
-          <p>
-            <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
-          </p>
-          {% endfor %}
+              <p>
+                <strong>Likes: {{ blog_data.likes_count }}</strong>
+              </p>
 
-          <form method="POST">
-            {% csrf_token %}
-            <input
-              type="hidden"
-              name="blog_id"
-              value="{{ blog_data.blog.id }}"
-            />
-            {{ form.as_p }}
-            <button type="submit" name="comment" class="btn btn-primary">
-              Add Comment
-            </button>
-          </form> {% endcomment %}
-          <small class="text-muted">
-            By {{ blog_data.blog.user.first_name|default:"Unknown" }} {{ blog_data.blog.user.last_name|default:"User" }} on {{ blog_data.blog.created_at }}
-          </small>
-        </div>
+              <small class="text-muted">By {{ blog_data.blog.user.first_name|default:'Unknown' }} {{ blog_data.blog.user.last_name|default:'User' }} on {{ blog_data.blog.created_at }}</small>
+            </div>
+          </div>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
   </div>
-</div>
-{% endblock %}
- {% block custom_js %}
-<script>
-  $(document).ready(function () {
-    checkLoginStatus(); // ✅ Check user login status on page load
-
-    $("#logout").click(function (event) {
-      event.preventDefault();
-      logoutUser();
-    });
-  });
-
-  // ✅ Function to check if user is already logged in
-  function checkLoginStatus() {
-    let authToken = localStorage.getItem("authToken");
-
-    if (!authToken) {
-      console.log("No auth token found. Redirecting to login...");
-      window.location.href = "/user/login/";
-      return;
-    }
-
-    $.ajax({
-      type: "GET",
-      url: "/api/check-login/",
-      headers: { Authorization: "Bearer " + authToken },
-      success: function (response) {
-        if (!response.logged_in) {
-          redirectToLogin();
+{% endblock %} {% block custom_js %}
+  <script>
+    // This function will now just ensure that users see the content
+    // without redirecting if they are not logged in.
+    $(document).ready(function () {
+      checkLoginStatus() // ✅ Check user login status on page load
+    })
+    
+    // ✅ Function to check if user is already logged in
+    function checkLoginStatus() {
+      let authToken = localStorage.getItem('authToken')
+    
+      if (!authToken) {
+        console.log('No auth token found.')
+        return
+      }
+    
+      $.ajax({
+        type: 'GET',
+        url: '/api/check-login/',
+        headers: { Authorization: 'Bearer ' + authToken },
+        success: function (response) {
+          if (!response.logged_in) {
+            console.log('User is not logged in.')
+          }
+        },
+        error: function () {
+          console.log('Error checking login status.')
         }
-      },
-      error: function () {
-        redirectToLogin();
-      },
-    });
-  }
-
-  // ✅ Function to log out user
-  function logoutUser() {
-    $.ajax({
-      type: "POST",
-      url: "/user/logout/",
-      headers: { "X-CSRFToken": getCookie("csrftoken") },
-      success: function () {
-        localStorage.removeItem("authToken"); // ✅ Clear token
-        alert("Logout successful!");
-        window.location.href = "/user/login/";
-      },
-      error: function () {
-        alert("Logout failed! Please try again.");
-      },
-    });
-  }
-
-  // ✅ Redirect to login page and remove auth token
-  function redirectToLogin() {
-    localStorage.removeItem("authToken");
-    window.location.href = "/user/login/";
-  }
-
-  // ✅ Function to get CSRF token from cookies
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie) {
-      document.cookie.split(";").forEach((cookie) => {
-        cookie = cookie.trim();
-        if (cookie.startsWith(name + "=")) {
-          cookieValue = decodeURIComponent(cookie.split("=")[1]);
+      })
+    }
+    
+    // ✅ Function to handle logout
+    // ✅ Function to handle logout
+    function logoutUser() {
+      $.ajax({
+        type: 'POST',
+        url: '{% url "logout" %}', // This URL needs to match the Django URL for logout
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }, // Ensure CSRF token is sent with the request
+        success: function () {
+          localStorage.removeItem('authToken') // Clear any auth token from local storage
+          alert('Logout successful!')
+          window.location.href = '/' // Redirect to home or login page
+        },
+        error: function () {
+          alert('Logout failed! Please try again.')
         }
-      });
+      })
     }
-    return cookieValue;
-  }
-</script>
-
-<script>
-  function like_login_form(event) {
-    // Prevent the default action (if any)
-    event.preventDefault();
-    console.log(event);
-
-    // Find the closest form and submit it
-    const form = event.target.closest("form");
-    if (form) {
-      form.submit(); // Submit the form
+    
+    // ✅ Function to get CSRF token from cookies
+    function getCookie(name) {
+      let cookieValue = null
+      if (document.cookie) {
+        document.cookie.split(';').forEach((cookie) => {
+          cookie = cookie.trim()
+          if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.split('=')[1])
+          }
+        })
+      }
+      return cookieValue
     }
-  }
-</script>
-
+    
+    // ✅ Function to handle like button actions
+    function like_login_form(event) {
+      event.preventDefault()
+      const form = event.target.closest('form')
+      if (form) {
+        form.submit() // Submit the form for liking the blog
+      }
+    }
+  </script>
 {% endblock %}
